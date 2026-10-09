@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedGuard | Medication Safety</title>
+
+<style>
+:root {
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --nav: #102c43;
+    --primary: #167d78;
+    --primary-dark: #105f5b;
+    --text: #203246;
+    --muted: #6b7b8b;
+    --border: #e1e8ef;
+    --high: #c62828;
+    --medium: #a96700;
+    --low: #19734a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+button, input, textarea, select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 245px;
+    background: var(--nav);
+    color: white;
+    padding: 25px 16px;
+    flex-shrink: 0;
+}
+
+.brand {
+    font-size: 25px;
+    font-weight: 800;
+    margin: 0 10px 6px;
+}
+
+.brand span {
+    color: #6de0c8;
+}
+
+.brand-sub {
+    margin: 0 10px 35px;
+    color: #b8cad8;
+    font-size: 12px;
+}
+
+.nav-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px 15px;
+    margin: 5px 0;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #d5e2eb;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+    background: #205267;
+    color: white;
+}
+
+.sidebar-note {
+    margin: 40px 8px 0;
+    padding: 12px;
+    border: 1px solid #426073;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #d3e0e8;
+}
+
+main {
+    min-width: 0;
+    flex: 1;
+    padding: 28px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.topbar h1 {
+    margin: 0 0 6px;
+    font-size: 27px;
+}
+
+.subtitle {
+    color: var(--muted);
+    margin: 0;
+    font-size: 14px;
+}
+
+.status {
+    background: #e1f5eb;
+    color: #16633f;
+    padding: 9px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.view {
+    display: none;
+}
+
+.view.active {
+    display: block;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 17px;
+    margin-bottom: 22px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 21px;
+    box-shadow: 0 3px 12px rgba(23, 48, 70, 0.025);
+    margin-bottom: 18px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-number {
+    font-size: 30px;
+    font-weight: 750;
+    margin: 10px 0 4px;
+}
+
+.stat-foot {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.card h2 {
+    font-size: 18px;
+    margin: 0 0 18px;
+}
+
+.card h3 {
+    font-size: 15px;
+    margin: 0 0 10px;
+}
+
+.row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.row > * {
+    flex: 1;
+    min-width: 0;
+}
+
+label {
+    display: block;
+    font-size: 13px;
+    font-weight: 650;
+    margin-bottom: 7px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #d5dee7;
+    border-radius: 8px;
+    background: white;
+    color: var(--text);
+    margin-bottom: 15px;
+    outline-color: var(--primary);
+}
+
+textarea {
+    min-height: 105px;
+    resize: vertical;
+}
+
+.btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 11px 16px;
+    background: var(--primary);
+    color: white;
+    font-weight: 650;
+}
+
+.btn:hover {
+    background: var(--primary-dark);
+}
+
+.btn.secondary {
+    background: #e8f2f3;
+    color: #155e60;
+}
+
+.btn.danger {
+    background: #b72e36;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+th, td {
+    text-align: left;
+    padding: 13px 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    color: var(--muted);
+    font-weight: 650;
+    background: #f8fafc;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.badge.HIGH {
+    color: var(--high);
+    background: #ffebee;
+}
+
+.badge.MEDIUM {
+    color: var(--medium);
+    background: #fff4dc;
+}
+
+.badge.LOW {
+    color: var(--low);
+    background: #e5f5eb;
+}
+
+.risk-item {
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--medium);
+    border-radius: 9px;
+    margin: 12px 0;
+}
+
+.risk-item.HIGH {
+    border-left-color: var(--high);
+}
+
+.risk-item.MEDIUM {
+    border-left-color: var(--medium);
+}
+
+.risk-item h3 {
+    margin: 10px 0;
+}
+
+.risk-item p {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.alert {
+    border-radius: 9px;
+    padding: 13px;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 12px 0;
+}
+
+.alert.info {
+    background: #eaf4fb;
+    color: #285778;
+}
+
+.alert.warning {
+    background: #fff4dc;
+    color: #744d00;
+}
+
+.empty {
+    padding: 22px 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.pill {
+    display: inline-block;
+    background: #edf3f7;
+    border-radius: 20px;
+    padding: 5px 9px;
+    font-size: 12px;
+    margin: 2px;
+}
+
+#toast {
+    position: fixed;
+    bottom: 22px;
+    right: 22px;
+    background: #173c4c;
+    color: white;
+    padding: 14px 18px;
+    border-radius: 9px;
+    box-shadow: 0 5px 20px #0002;
+    display: none;
+    z-index: 10;
+    max-width: 350px;
+}
+
+.footer {
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin: 20px 0 0;
+}
+
+@media(max-width: 900px) {
+    .sidebar {
+        width: 190px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    main {
+        padding: 20px;
+    }
+}
+
+@media(max-width: 650px) {
+    .layout {
+        display: block;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 15px;
+    }
+
+    .brand-sub {
+        margin-bottom: 14px;
+    }
+
+    .nav-btn {
+        display: inline-block;
+        width: auto;
+        padding: 10px;
+        margin: 2px;
+    }
+
+    .sidebar-note {
+        display: none;
+    }
+
+    main {
+        padding: 15px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .row {
+        display: block;
+    }
+
+    .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Med<span>Guard</span></div>
+        <p class="brand-sub">Medication Safety Platform</p>
+
+        <button class="nav-btn active" data-view="dashboard">▦ &nbsp; Dashboard</button>
+        <button class="nav-btn" data-view="patients">♙ &nbsp; Patients</button>
+        <button class="nav-btn" data-view="analysis">⚕ &nbsp; Medication Analysis</button>
+        <button class="nav-btn" data-view="extract">▤ &nbsp; Prescription Text</button>
+        <button class="nav-btn" data-view="reports">▣ &nbsp; Safety Reports</button>
+
+        <div class="sidebar-note">
+            <strong>Prototype Notice</strong><br>
+            MedGuard is an educational hackathon prototype. Its limited rules
+            are not clinically validated and must not be used to make treatment
+            decisions.
+        </div>
+    </aside>
+
+    <main>
+        <header class="topbar">
+            <div>
+                <h1 id="page-title">Dashboard</h1>
+                <p class="subtitle" id="page-subtitle">
+                    Medication safety overview
+                </p>
+            </div>
+            <div class="status" id="connection-status">Checking backend...</div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="view active" id="dashboard">
+
+            <div class="grid">
+                <div class="card">
+                    <div class="stat-label">Registered Patients</div>
+                    <div class="stat-number" id="patient-count">0</div>
+                    <div class="stat-foot">Saved patient profiles</div>
+                </div>
+
+                <div class="card">
+                    <div class="stat-label">Safety Reports</div>
+                    <div class="stat-number" id="report-count">0</div>
+                    <div class="stat-foot">Saved analysis reports</div>
+                </div>
+
+                <div class="card">
+                    <div class="stat-label">Reports With Flags</div>
+                    <div class="stat-number" id="flagged-count">0</div>
+                    <div class="stat-foot">Reports containing prototype warnings</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Welcome to MedGuard</h2>
+                <p class="muted">
+                    MedGuard demonstrates how patient information and medication
+                    lists can be screened for selected potential safety concerns.
+                </p>
+                <div class="row">
+                    <button class="btn" onclick="showView('patients')">Add a Patient</button>
+                    <button class="btn secondary" onclick="showView('analysis')">Start Medication Analysis</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Recent Safety Reports</h2>
+                <div id="recent-reports" class="empty">Loading reports...</div>
+            </div>
+
+            <div class="alert warning">
+                <strong>Important:</strong> An empty warning list does not prove
+                that a medication combination is safe. Always confirm medications,
+                doses, allergies, and treatment decisions with a qualified
+                doctor or pharmacist.
+            </div>
+        </section>
+
+        <!-- PATIENTS -->
+        <section class="view" id="patients">
+            <div class="card">
+                <h2>Register Patient</h2>
+
+                <form id="patient-form">
+                    <div class="row">
+                        <div>
+                            <label for="patient-name">Patient Name *</label>
+                            <input id="patient-name" required maxlength="100"
+                                   placeholder="Enter patient name">
+                        </div>
+                        <div>
+                            <label for="patient-age">Age *</label>
+                            <input id="patient-age" type="number" min="0" max="120"
+                                   required placeholder="Age in years">
+                        </div>
+                    </div>
+
+                    <label for="patient-allergies">Known Allergies</label>
+                    <input id="patient-allergies"
+                           placeholder="e.g. Penicillin, separated by commas">
+
+                    <label for="patient-conditions">Medical Conditions</label>
+                    <input id="patient-conditions"
+                           placeholder="e.g. Kidney Disease, separated by commas">
+
+                    <button class="btn" type="submit">Save Patient</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Registered Patients</h2>
+                <div id="patients-table" class="empty">Loading patients...</div>
+            </div>
+        </section>
+
+        <!-- ANALYSIS -->
+        <section class="view" id="analysis">
+            <div class="card">
+                <h2>Patient Details</h2>
+
+                <label for="analysis-patient-select">Load Saved Patient</label>
+                <select id="analysis-patient-select">
+                    <option value="">Enter patient details manually</option>
+                </select>
+
+                <div class="row">
+                    <div>
+                        <label for="analysis-name">Patient Name</label>
+                        <input id="analysis-name" value="Demo Patient"
+                               placeholder="Patient name">
+                    </div>
+                    <div>
+                        <label for="analysis-age">Age</label>
+                        <input id="analysis-age" type="number" min="0" max="120"
+                               value="45">
+                    </div>
+                </div>
+
+                <label for="analysis-allergies">Allergies (comma-separated)</label>
+                <input id="analysis-allergies" placeholder="e.g. Penicillin">
+
+                <label for="analysis-conditions">Medical Conditions (comma-separated)</label>
+                <input id="analysis-conditions" placeholder="e.g. Kidney Disease">
+            </div>
+
+            <div class="card">
+                <h2>Medication List</h2>
+                <p class="muted">
+                    Enter the medication names from the prescription. Include
+                    the prescribed dose and frequency when available.
+                </p>
+
+                <div id="medication-list"></div>
+
+                <button class="btn secondary" type="button" onclick="addMedication()">
+                    + Add Medication
+                </button>
+
+                <button class="btn" type="button" id="analyze-btn"
+                        onclick="analyzeMedications()">
+                    Analyze Medication List
+                </button>
+            </div>
+
+            <div class="card" id="analysis-results" style="display:none">
+                <h2>Analysis Results</h2>
+                <div id="analysis-summary"></div>
+                <div id="risk-results"></div>
+                <div id="analysis-notice" class="alert warning"></div>
+                <button class="btn secondary" onclick="window.print()">
+                    Print / Save Report as PDF
+                </button>
+            </div>
+        </section>
+
+        <!-- PRESCRIPTION EXTRACTION -->
+        <section class="view" id="extract">
+            <div class="card">
+                <h2>Prescription Text Extraction</h2>
+                <p class="muted">
+                    Paste text from a prescription or medication list. The demo
+                    searches for a limited set of medicine names. It does not
+                    read prescription images and is not a validated medical OCR
+                    system.
+                </p>
+
+                <label for="prescription-text">Prescription Text</label>
+                <textarea id="prescription-text"
+                          placeholder="Example:&#10;Warfarin 5 mg once daily&#10;Ibuprofen 200 mg as needed"></textarea>
+
+                <button class="btn" id="extract-btn" onclick="extractPrescription()">
+                    Identify Medicine Names
+                </button>
+
+                <div id="extract-results"></div>
+            </div>
+        </section>
+
+        <!-- REPORTS -->
+        <section class="view" id="reports">
+            <div class="card">
+                <h2>Safety Report History</h2>
+                <div id="reports-table" class="empty">Loading reports...</div>
+            </div>
+        </section>
+
+        <p class="footer">
+            MedGuard | Educational hackathon prototype. Not a medical device,
+            diagnostic system, prescribing tool, or substitute for professional
+            clinical judgment. Limited demonstration rules are not clinically
+            validated.
+        </p>
+    </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+
+let savedPatients = [];
+let savedReports = [];
+
+function toast(message) {
+    const element = document.getElementById("toast");
+    element.textContent = message;
+    element.style.display = "block";
+
+    setTimeout(() => {
+        element.style.display = "none";
+    }, 3500);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+function splitValues(value) {
+    return value.split(",").map(item => item.trim()).filter(Boolean);
+}
+
+async function apiRequest(path, options = {}) {
+    const response = await fetch(API + path, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+}
+
+function showView(viewName) {
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.toggle("active", view.id === viewName);
+    });
+
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === viewName);
+    });
+
+    const titles = {
+        dashboard: ["Dashboard", "Medication safety overview"],
+        patients: ["Patients", "Manage patient profiles"],
+        analysis: ["Medication Analysis", "Screen a medication list for selected prototype warnings"],
+        extract: ["Prescription Text", "Identify medicine names from pasted text"],
+        reports: ["Safety Reports", "Review saved analysis history"]
+    };
+
+    document.getElementById("page-title").textContent = titles[viewName][0];
+    document.getElementById("page-subtitle").textContent = titles[viewName][1];
+
+    if (viewName === "dashboard") refreshDashboard();
+    if (viewName === "patients") loadPatients();
+    if (viewName === "analysis") populatePatientSelect();
+    if (viewName === "reports") loadReports();
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+    button.addEventListener("click", () => showView(button.dataset.view));
+});
+
+async function checkBackend() {
+    const status = document.getElementById("connection-status");
+
+    try {
+        await apiRequest("/api/health");
+        status.textContent = "● Backend Connected";
+        status.style.background = "#e1f5eb";
+        status.style.color = "#16633f";
+    } catch (error) {
+        status.textContent = "● Backend Disconnected";
+        status.style.background = "#ffebee";
+        status.style.color = "#b71c1c";
+    }
+}
+
+async function loadPatients() {
+    try {
+        savedPatients = await apiRequest("/api/patients");
+        renderPatients();
+        populatePatientSelect();
+        document.getElementById("patient-count").textContent = savedPatients.length;
+    } catch (error) {
+        document.getElementById("patients-table").innerHTML =
+            '<div class="empty">Unable to load patients. Check that the backend is running.</div>';
+    }
+}
+
+function renderPatients() {
+    const target = document.getElementById("patients-table");
+
+    if (!savedPatients.length) {
+        target.innerHTML = '<div class="empty">No patients registered yet.</div>';
+        return;
+    }
+
+    target.innerHTML = `
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Age</th><th>Allergies</th><th>Conditions</th></tr>
+            </thead>
+            <tbody>
+                ${savedPatients.map(patient => `
+                    <tr>
+                        <td>${escapeHtml(patient.name)}</td>
+                        <td>${patient.age}</td>
+                        <td>${escapeHtml(patient.allergies.join(", ") || "Not recorded")}</td>
+                        <td>${escapeHtml(patient.conditions.join(", ") || "Not recorded")}</td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+        </div>`;
+}
+
+document.getElementById("patient-form").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const patient = {
+        name: document.getElementById("patient-name").value.trim(),
+        age: Number(document.getElementById("patient-age").value),
+        allergies: splitValues(document.getElementById("patient-allergies").value),
+        conditions: splitValues(document.getElementById("patient-conditions").value)
+    };
+
+    try {
+        await apiRequest("/api/patients", {
+            method: "POST",
+            body: JSON.stringify(patient)
+        });
+
+        toast("Patient saved successfully.");
+        event.target.reset();
+        await loadPatients();
+    } catch (error) {
+        toast("Unable to save patient: " + error.message);
+    }
+});
+
+async function populatePatientSelect() {
+    try {
+        savedPatients = await apiRequest("/api/patients");
+    } catch (error) {
+        return;
+    }
+
+    const select = document.getElementById("analysis-patient-select");
+    const currentValue = select.value;
+
+    select.innerHTML =
+        '<option value="">Enter patient details manually</option>' +
+        savedPatients.map(patient => `
+            <option value="${patient.id}">
+                ${escapeHtml(patient.name)} (Age ${patient.age})
+            </option>
+        `).join("");
+
+    if (savedPatients.some(patient => String(patient.id) === currentValue)) {
+        select.value = currentValue;
+    }
+}
+
+document.getElementById("analysis-patient-select").addEventListener("change", event => {
+    const patient = savedPatients.find(
+        item => String(item.id) === event.target.value
+    );
+
+    if (!patient) return;
+
+    document.getElementById("analysis-name").value = patient.name;
+    document.getElementById("analysis-age").value = patient.age;
+    document.getElementById("analysis-allergies").value = patient.allergies.join(", ");
+    document.getElementById("analysis-conditions").value = patient.conditions.join(", ");
+});
+
+function addMedication(name = "", dose = "", frequency = "") {
+    const container = document.getElementById("medication-list");
+    const row = document.createElement("div");
+
+    row.className = "medication-row card";
+    row.style.padding = "15px";
+
+    row.innerHTML = `
+        <div class="row">
+            <div>
+                <label>Medicine Name *</label>
+                <input class="med-name" required maxlength="100"
+                       placeholder="e.g. Ibuprofen" value="${escapeHtml(name)}">
+            </div>
+            <div>
+                <label>Dose</label>
+                <input class="med-dose" maxlength="100"
+                       placeholder="e.g. 200 mg" value="${escapeHtml(dose)}">
+            </div>
+            <div>
+                <label>Frequency</label>
+                <input class="med-frequency" maxlength="100"
+                       placeholder="e.g. Once daily" value="${escapeHtml(frequency)}">
+            </div>
+        </div>
+        <button type="button" class="btn danger remove-med">Remove</button>
+    `;
+
+    row.querySelector(".remove-med").addEventListener("click", () => {
+        row.remove();
+
+        if (!container.querySelector(".medication-row")) {
+            addMedication();
+        }
+    });
+
+    container.appendChild(row);
+}
+
+addMedication();
+
+async function analyzeMedications() {
+    const name = document.getElementById("analysis-name").value.trim();
+    const ageValue = document.getElementById("analysis-age").value;
+    const rows = [...document.querySelectorAll(".medication-row")];
+
+    const medications = rows.map(row => ({
+        name: row.querySelector(".med-name").value.trim(),
+        dose: row.querySelector(".med-dose").value.trim(),
+        frequency: row.querySelector(".med-frequency").value.trim()
+    })).filter(medicine => medicine.name);
+
+    if (!name) {
+        toast("Enter the patient's name.");
+        return;
+    }
+
+    if (ageValue === "" || Number(ageValue) < 0 || Number(ageValue) > 120) {
+        toast("Enter a valid patient age.");
+        return;
+    }
+
+    if (!medications.length) {
+        toast("Enter at least one medication.");
+        return;
+    }
+
+    const payload = {
+        patient: {
+            name,
+            age: Number(ageValue),
+            allergies: splitValues(
+                document.getElementById("analysis-allergies").value
+            ),
+            conditions: splitValues(
+                document.getElementById("analysis-conditions").value
+            )
+        },
+        medications
+    };
+
+    const button = document.getElementById("analyze-btn");
+    button.disabled = true;
+    button.textContent = "Analyzing...";
+
+    try {
+        const report = await apiRequest("/api/analyze", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        displayAnalysis(report);
+        await refreshDashboard();
+        toast("Analysis completed. Review all warnings carefully.");
+    } catch (error) {
+        toast("Analysis failed: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Analyze Medication List";
+    }
+}
+
+function displayAnalysis(report) {
+    document.getElementById("analysis-results").style.display = "block";
+
+    document.getElementById("analysis-summary").innerHTML = `
+        <p><strong>Patient:</strong> ${escapeHtml(report.patient_name)}</p>
+        <p><strong>Medication entries:</strong> ${report.medication_count}</p>
+        <p><strong>Prototype warnings:</strong> ${report.risk_count}</p>
+        <p class="muted">Analysis time: ${escapeHtml(report.analyzed_at)}</p>
+    `;
+
+    const results = document.getElementById("risk-results");
+
+    if (!report.risks.length) {
+        results.innerHTML = `
+            <div class="alert info">
+                No warnings were generated by the limited demo rules for this
+                input. This does not establish that the medications are safe.
+                The rule set does not cover all medicines, doses, or conditions.
+            </div>`;
+    } else {
+        results.innerHTML = report.risks.map(risk => `
+            <div class="risk-item ${escapeHtml(risk.severity)}">
+                <span class="badge ${escapeHtml(risk.severity)}">
+                    ${escapeHtml(risk.severity)}
+                </span>
+                <h3>${escapeHtml(risk.title)}</h3>
+                <p>${escapeHtml(risk.reason)}</p>
+                <p><strong>Related medicines:</strong>
+                    ${escapeHtml(risk.medications.join(", "))}
+                </p>
+            </div>
+        `).join("");
+    }
+
+    document.getElementById("analysis-notice").textContent = report.notice;
+    document.getElementById("analysis-results").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+async function extractPrescription() {
+    const text = document.getElementById("prescription-text").value.trim();
+
+    if (!text) {
+        toast("Paste some prescription text first.");
+        return;
+    }
+
+    const button = document.getElementById("extract-btn");
+    button.disabled = true;
+    button.textContent = "Checking...";
+
+    try {
+        const result = await apiRequest("/api/prescription/extract", {
+            method: "POST",
+            body: JSON.stringify({text})
+        });
+
+        const target = document.getElementById("extract-results");
+
+        if (!result.medications.length) {
+            target.innerHTML = `
+                <div class="alert info">
+                    No names from the limited demo medicine list were detected.
+                    This does not mean the prescription contains no medicines.
+                </div>`;
+            return;
+        }
+
+        target.innerHTML = `
+            <div class="card">
+                <h3>Detected Medicine Names</h3>
+                <p>${result.medications.map(item =>
+                    `<span class="pill">${escapeHtml(item.name)}</span>`
+                ).join("")}</p>
+                <p class="muted">${escapeHtml(result.notice)}</p>
+                <button class="btn" onclick="useExtractedMedicines()">
+                    Send Names to Medication Analysis
+                </button>
+            </div>`;
+
+        window.extractedMedicines = result.medications;
+    } catch (error) {
+        toast("Extraction failed: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Identify Medicine Names";
+    }
+}
+
+function useExtractedMedicines() {
+    showView("analysis");
+
+    document.getElementById("medication-list").innerHTML = "";
+
+    const medicines = window.extractedMedicines || [];
+
+    if (!medicines.length) {
+        addMedication();
+    } else {
+        medicines.forEach(medicine => addMedication(medicine.name));
+    }
+
+    toast("Review the detected names and enter missing patient information.");
+}
+
+async function loadReports() {
+    try {
+        savedReports = await apiRequest("/api/reports");
+        renderReports();
+    } catch (error) {
+        document.getElementById("reports-table").innerHTML =
+            '<div class="empty">Unable to load reports. Check the backend.</div>';
+    }
+}
+
+function renderReports() {
+    const target = document.getElementById("reports-table");
+
+    if (!savedReports.length) {
+        target.innerHTML = '<div class="empty">No reports generated yet.</div>';
+        return;
+    }
+
+    target.innerHTML = `
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Patient</th><th>Medicines</th>
+                    <th>Warnings</th><th>Date</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${savedReports.map(report => `
+                    <tr>
+                        <td>${report.id}</td>
+                        <td>${escapeHtml(report.patient_name)}</td>
+                        <td>${report.medication_count}</td>
+                        <td>${report.risk_count}</td>
+                        <td>${escapeHtml(report.created_at)}</td>
+                        <td>
+                            <button class="btn secondary"
+                                onclick="openSavedReport(${report.id})">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+        </div>`;
+}
+
+function openSavedReport(id) {
+    const saved = savedReports.find(report => report.id === id);
+
+    if (!saved) return;
+
+    showView("analysis");
+    displayAnalysis(saved.report);
+}
+
+async function refreshDashboard() {
+    try {
+        const [patients, reports] = await Promise.all([
+            apiRequest("/api/patients"),
+            apiRequest("/api/reports")
+        ]);
+
+        savedPatients = patients;
+        savedReports = reports;
+
+        document.getElementById("patient-count").textContent = patients.length;
+        document.getElementById("report-count").textContent = reports.length;
+        document.getElementById("flagged-count").textContent =
+            reports.filter(report => report.risk_count > 0).length;
+
+        const target = document.getElementById("recent-reports");
+
+        if (!reports.length) {
+            target.innerHTML = '<div class="empty">No reports yet. Start a medication analysis to create one.</div>';
+        } else {
+            target.innerHTML = `
+                <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Patient</th><th>Medicines</th><th>Warnings</th><th>Date</th></tr></thead>
+                    <tbody>
+                        ${reports.slice(0, 5).map(report => `
+                            <tr>
+                                <td>${escapeHtml(report.patient_name)}</td>
+                                <td>${report.medication_count}</td>
+                                <td>${report.risk_count}</td>
+                                <td>${escapeHtml(report.created_at)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+                </div>`;
+        }
+    } catch (error) {
+        document.getElementById("recent-reports").innerHTML =
+            '<div class="empty">Unable to connect to the backend.</div>';
+    }
+}
+
+async function initialize() {
+    await checkBackend();
+    await loadPatients();
+    await refreshDashboard();
+}
+
+initialize();
+</script>
+</body>
+</html>
