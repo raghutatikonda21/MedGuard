@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedGuard | Medication Safety</title>
+
+<style>
+
+:root{--bg:#f3f7fb;--card:#fff;--nav:#102a43;--primary:#087f8c;--primary-dark:#066873;--primary-soft:#e3f5f5;--text:#172b3a;--muted:#637789;--border:#dce6ee;--high:#b4232f;--medium:#925b00;--low:#16734a;--shadow:0 10px 28px rgba(20,48,70,.06);--radius:16px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 90% 0%,rgba(8,127,140,.07),transparent 28rem),var(--bg);color:var(--text);line-height:1.5}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;transition:background .18s ease,transform .18s ease,box-shadow .18s ease}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(8,127,140,.22);outline-offset:2px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:252px;background:linear-gradient(165deg,var(--nav),#0c3549 78%);color:#fff;padding:27px 17px;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{font-size:27px;letter-spacing:-.8px;font-weight:850;margin:0 10px 4px}.brand span{color:#72e2d0}
+.brand-sub{margin:0 10px 34px;color:#b8cbd7;font-size:12px;letter-spacing:.3px}
+.nav-btn{display:block;width:100%;text-align:left;padding:13px 14px;margin:6px 0;border:1px solid transparent;border-radius:11px;background:transparent;color:#d6e3eb;font-size:14px}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{background:linear-gradient(100deg,#146c7a,#205267);color:#fff;border-color:rgba(255,255,255,.12);box-shadow:0 5px 15px rgba(0,0,0,.12)}
+.sidebar-note{margin:38px 7px 0;padding:13px;border:1px solid #3b5b6d;background:rgba(255,255,255,.035);border-radius:12px;font-size:12px;line-height:1.65;color:#d3e0e8}
+main{min-width:0;flex:1;padding:32px clamp(18px,3vw,42px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px;padding-bottom:21px;border-bottom:1px solid rgba(220,230,238,.9)}
+.topbar h1{margin:0 0 5px;font-size:clamp(25px,2.4vw,32px);letter-spacing:-.8px}
+.subtitle{color:var(--muted);margin:0;font-size:14px}
+.status{background:#e1f5eb;color:#16633f;padding:9px 13px;border:1px solid rgba(22,99,63,.08);border-radius:999px;font-size:12px;font-weight:750;white-space:nowrap}
+.view{display:none;animation:appear .22s ease both}.view.active{display:block}
+@keyframes appear{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:22px}
+.grid .card{min-height:142px;position:relative;overflow:hidden}.grid .card:after{content:"";position:absolute;width:84px;height:84px;border-radius:50%;right:-26px;bottom:-34px;background:var(--primary-soft);opacity:.85}.grid .card>*{position:relative;z-index:1}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:23px;box-shadow:var(--shadow);margin-bottom:18px}
+.stat-label{color:var(--muted);font-size:13px;font-weight:650}.stat-number{font-size:34px;line-height:1.2;letter-spacing:-1px;font-weight:800;margin:11px 0 5px}.stat-foot{font-size:12px;color:var(--muted)}
+.card h2{font-size:18px;letter-spacing:-.25px;margin:0 0 18px}.card h3{font-size:15px;margin:0 0 10px}
+.row{display:flex;gap:16px;align-items:flex-start}.row>*{flex:1;min-width:0}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:#30495c}
+input,textarea,select{width:100%;padding:12px 13px;border:1px solid #d2dee7;border-radius:10px;background:#fff;color:var(--text);margin-bottom:16px;outline-color:var(--primary);transition:border-color .15s ease,box-shadow .15s ease}
+input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(8,127,140,.09)}
+textarea{min-height:125px;resize:vertical}
+.btn{border:1px solid transparent;border-radius:10px;padding:11px 16px;background:var(--primary);color:#fff;font-weight:750;font-size:13px;box-shadow:0 4px 10px rgba(8,127,140,.12)}
+.btn:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 7px 14px rgba(8,127,140,.16)}
+.btn.secondary{background:var(--primary-soft);color:#155e60;box-shadow:none}.btn.secondary:hover{background:#d1eeee}
+.btn.danger{background:#fff0f0;border-color:#f3cccc;color:#a5232b;box-shadow:none}.btn.danger:hover{background:#ffe1e1}
+.btn:disabled{opacity:.62;cursor:wait;transform:none;box-shadow:none}
+.muted{color:var(--muted);font-size:13px;line-height:1.7}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+th,td{text-align:left;padding:14px 12px;border-bottom:1px solid var(--border);vertical-align:top}
+th{color:#5d7181;font-weight:750;background:#f5f9fb;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:#f8fbfd}
+.badge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:10px;letter-spacing:.45px;font-weight:850}
+.badge.HIGH{color:var(--high);background:#ffebee}.badge.MEDIUM{color:var(--medium);background:#fff4dc}.badge.LOW{color:var(--low);background:#e5f5eb}
+.risk-item{padding:17px;border:1px solid var(--border);border-left:5px solid var(--medium);border-radius:12px;margin:13px 0;background:#fff}
+.risk-item.HIGH{border-left-color:var(--high)}.risk-item.MEDIUM{border-left-color:var(--medium)}.risk-item.LOW{border-left-color:var(--low)}
+.risk-item h3{margin:11px 0 8px}.risk-item p{font-size:13px;line-height:1.7;margin:8px 0}
+.alert{border-radius:11px;padding:14px 16px;font-size:13px;line-height:1.7;margin:13px 0;border:1px solid transparent}
+.alert.info{background:#eaf4fb;color:#285778;border-color:#d8eaf6}.alert.warning{background:#fff4dc;color:#744d00;border-color:#f2dfb6}
+.empty{padding:27px 14px;text-align:center;color:var(--muted);font-size:13px}
+.pill{display:inline-block;background:var(--primary-soft);color:#155e60;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:650;margin:3px}
+#toast{position:fixed;bottom:22px;right:22px;background:#173c4c;color:#fff;padding:14px 18px;border-radius:12px;box-shadow:0 12px 30px #0002;display:none;z-index:100;max-width:min(390px,calc(100vw - 32px));font-size:13px}
+.footer{font-size:11px;line-height:1.7;color:var(--muted);margin:24px 0 0;padding-top:15px;border-top:1px solid var(--border)}
+@media(max-width:1000px){.sidebar{width:220px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:24px}}
+@media(max-width:700px){.layout{display:block}.sidebar{width:100%;height:auto;position:relative;padding:15px;overflow:visible}.brand{font-size:24px}.brand-sub{margin-bottom:13px}.nav-btn{display:inline-block;width:auto;padding:9px 11px;margin:2px;font-size:12px}.sidebar-note{display:none}main{padding:18px 14px}.grid{grid-template-columns:1fr;gap:10px}.grid .card{min-height:0}.row{display:block}.topbar{align-items:flex-start;flex-direction:column;gap:12px}.card{padding:18px;border-radius:13px}th,td{padding:11px 9px}}
+@media print{body{background:#fff}.sidebar,.topbar,.btn,#toast,.footer{display:none!important}main{padding:0}.view{display:none!important}#analysis.view.active{display:block!important}#analysis-results{display:block!important;box-shadow:none;border:0}.card{box-shadow:none;break-inside:avoid}}
+
+
+.sev-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0 18px}
+.sev-box{border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:#fff;border-top:4px solid var(--border)}
+.sev-box.HIGH{border-top-color:var(--high);background:#fff8f8}.sev-box.MEDIUM{border-top-color:var(--medium);background:#fffcf3}.sev-box.LOW{border-top-color:var(--low);background:#f6fcf8}
+.sev-box b{display:block;font-size:28px;letter-spacing:-1px;line-height:1.1}
+.sev-box.HIGH b{color:var(--high)}.sev-box.MEDIUM b{color:var(--medium)}.sev-box.LOW b{color:var(--low)}
+.sev-box span{font-size:12px;color:var(--muted);font-weight:650}
+.banner{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:14px 16px;margin:10px 0;font-size:13px;line-height:1.65;border:1px solid}
+.banner .ico{font-size:20px;line-height:1.3}
+.banner.allergy{background:#ffebee;border-color:#f3bcc2;color:#8e1b25}
+.banner.duplicate{background:#fff4dc;border-color:#f2dfb6;color:#744d00}
+.cat{display:inline-block;margin-left:8px;font-size:11px;font-weight:700;color:var(--muted)}
+.med-tags{margin-top:6px}
+.demo-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:18px;padding:12px 14px;background:var(--primary-soft);border-radius:12px;font-size:13px}
+.demo-bar span{font-weight:700;color:#155e60}
+@media(max-width:700px){.sev-grid{grid-template-columns:1fr}}
+
+</style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">Med<span>Guard</span></div>
+        <p class="brand-sub">Medication Safety Platform</p>
+
+        <button class="nav-btn active" data-view="dashboard">▦ &nbsp; Dashboard</button>
+        <button class="nav-btn" data-view="patients">♙ &nbsp; Patients</button>
+        <button class="nav-btn" data-view="analysis">⚕ &nbsp; Medication Analysis</button>
+        <button class="nav-btn" data-view="extract">▤ &nbsp; Prescription Text</button>
+        <button class="nav-btn" data-view="reports">▣ &nbsp; Safety Reports</button>
+
+    </aside>
+
+    <main>
+        <header class="topbar">
+            <div>
+                <h1 id="page-title">Dashboard</h1>
+                <p class="subtitle" id="page-subtitle">
+                    Medication safety overview
+                </p>
+            </div>
+            <div class="status" id="connection-status">Checking backend...</div>
+        </header>
+
+        <!-- DASHBOARD -->
+        <section class="view active" id="dashboard">
+
+            <div class="grid">
+                <div class="card">
+                    <div class="stat-label">Registered Patients</div>
+                    <div class="stat-number" id="patient-count">0</div>
+                    <div class="stat-foot">Saved patient profiles</div>
+                </div>
+
+                <div class="card">
+                    <div class="stat-label">Safety Reports</div>
+                    <div class="stat-number" id="report-count">0</div>
+                    <div class="stat-foot">Saved analysis reports</div>
+                </div>
+
+                <div class="card">
+                    <div class="stat-label">Reports With Flags</div>
+                    <div class="stat-number" id="flagged-count">0</div>
+                    <div class="stat-foot">Reports containing prototype warnings</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Welcome to MedGuard</h2>
+                <p class="muted">
+                    MedGuard demonstrates how patient information and medication
+                    lists can be screened for selected potential safety concerns.
+                </p>
+                <div class="row">
+                    <button class="btn" onclick="showView('patients')">Add a Patient</button>
+                    <button class="btn secondary" onclick="showView('analysis')">Start Medication Analysis</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Recent Safety Reports</h2>
+                <div id="recent-reports" class="empty">Loading reports...</div>
+            </div>
+
+            <div class="alert warning">
+                <strong>Important:</strong> An empty warning list does not prove
+                that a medication combination is safe. Always confirm medications,
+                doses, allergies, and treatment decisions with a qualified
+                doctor or pharmacist.
+            </div>
+        </section>
+
+        <!-- PATIENTS -->
+        <section class="view" id="patients">
+            <div class="card">
+                <h2 id="patient-form-title">Register Patient</h2>
+
+                <form id="patient-form">
+                    <div class="row">
+                        <div>
+                            <label for="patient-name">Patient Name *</label>
+                            <input id="patient-name" required maxlength="100"
+                                   placeholder="Enter patient name">
+                        </div>
+                        <div>
+                            <label for="patient-age">Age *</label>
+                            <input id="patient-age" type="number" min="0" max="120"
+                                   required placeholder="Age in years">
+                        </div>
+                    </div>
+
+                    <label for="patient-allergies">Known Allergies</label>
+                    <input id="patient-allergies"
+                           placeholder="e.g. Penicillin, separated by commas">
+
+                    <label for="patient-conditions">Medical Conditions</label>
+                    <input id="patient-conditions"
+                           placeholder="e.g. Kidney Disease, separated by commas">
+
+                    <button class="btn" type="submit" id="patient-save-btn">Save Patient</button>
+                    <button class="btn secondary" type="button" id="patient-cancel-btn" style="display:none" onclick="cancelPatientEdit()">Cancel Edit</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Registered Patients</h2>
+                <div id="patients-table" class="empty">Loading patients...</div>
+            </div>
+        </section>
+
+        <!-- ANALYSIS -->
+        <section class="view" id="analysis">
+            <div class="card">
+                <h2>Patient Details</h2>
+
+                <div class="demo-bar">
+                    <span>Demo mode (fictional data):</span>
+                    <button class="btn secondary" type="button" onclick="loadDemo('complex')">Load multi-risk patient</button>
+                    <button class="btn secondary" type="button" onclick="loadDemo('clear')">Load no-flag patient</button>
+                </div>
+
+                <label for="analysis-patient-select">Load Saved Patient</label>
+                <select id="analysis-patient-select">
+                    <option value="">Enter patient details manually</option>
+                </select>
+
+                <div class="row">
+                    <div>
+                        <label for="analysis-name">Patient Name</label>
+                        <input id="analysis-name" value="Demo Patient"
+                               placeholder="Patient name">
+                    </div>
+                    <div>
+                        <label for="analysis-age">Age</label>
+                        <input id="analysis-age" type="number" min="0" max="120"
+                               value="45">
+                    </div>
+                </div>
+
+                <label for="analysis-allergies">Allergies (comma-separated)</label>
+                <input id="analysis-allergies" placeholder="e.g. Penicillin">
+
+                <label for="analysis-conditions">Medical Conditions (comma-separated)</label>
+                <input id="analysis-conditions" placeholder="e.g. Kidney Disease">
+            </div>
+
+            <div class="card">
+                <h2>Medication List</h2>
+                <p class="muted">
+                    Enter the medication names from the prescription. Include
+                    the prescribed dose and frequency when available.
+                </p>
+
+                <div id="medication-list"></div>
+
+                <button class="btn secondary" type="button" onclick="addMedication()">
+                    + Add Medication
+                </button>
+
+                <button class="btn" type="button" id="analyze-btn"
+                        onclick="analyzeMedications()">
+                    Analyze Medication List
+                </button>
+            </div>
+
+            <div class="card" id="analysis-results" style="display:none">
+                <h2>Analysis Results</h2>
+                <div id="analysis-summary"></div>
+                <div id="risk-results"></div>
+                <div id="analysis-notice" class="alert warning"></div>
+                <button class="btn secondary" onclick="window.print()">
+                    Print / Save Report as PDF
+                </button>
+            </div>
+        </section>
+
+        <!-- PRESCRIPTION EXTRACTION -->
+        <section class="view" id="extract">
+            <div class="card">
+                <h2>Prescription Text Extraction</h2>
+                <p class="muted">
+                    Paste text from a prescription or medication list. The demo
+                    searches for a limited set of medicine names. It does not
+                    read prescription images and is not a validated medical OCR
+                    system.
+                </p>
+
+                <label for="prescription-text">Prescription Text</label>
+                <textarea id="prescription-text"
+                          placeholder="Example:&#10;Warfarin 5 mg once daily&#10;Ibuprofen 200 mg as needed"></textarea>
+
+                <button class="btn" id="extract-btn" onclick="extractPrescription()">
+                    Identify Medicine Names
+                </button>
+
+                <div id="extract-results"></div>
+            </div>
+        </section>
+
+        <!-- REPORTS -->
+        <section class="view" id="reports">
+            <div class="card">
+                <h2>Safety Report History</h2>
+                <div id="reports-table" class="empty">Loading reports...</div>
+            </div>
+        </section>
+
+        <p class="footer">
+            MedGuard | Medication Safety Dashboard
+        </p>
+    </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+
+let savedPatients = [];
+let savedReports = [];
+
+function toast(message) {
+    const element = document.getElementById("toast");
+    element.textContent = message;
+    element.style.display = "block";
+
+    setTimeout(() => {
+        element.style.display = "none";
+    }, 3500);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[character]);
+}
+
+function splitValues(value) {
+    return value.split(",").map(item => item.trim()).filter(Boolean);
+}
+
+async function apiRequest(path, options = {}) {
+    const response = await fetch(API + path, {
+        ...options,
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        }
+    });
+
+    if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+}
+
+function showView(viewName) {
+    document.querySelectorAll(".view").forEach(view => {
+        view.classList.toggle("active", view.id === viewName);
+    });
+
+    document.querySelectorAll(".nav-btn").forEach(button => {
+        button.classList.toggle("active", button.dataset.view === viewName);
+    });
+
+    const titles = {
+        dashboard: ["Dashboard", "Medication safety overview"],
+        patients: ["Patients", "Manage patient profiles"],
+        analysis: ["Medication Analysis", "Screen a medication list for selected prototype warnings"],
+        extract: ["Prescription Text", "Identify medicine names from pasted text"],
+        reports: ["Safety Reports", "Review saved analysis history"]
+    };
+
+    document.getElementById("page-title").textContent = titles[viewName][0];
+    document.getElementById("page-subtitle").textContent = titles[viewName][1];
+
+    if (viewName === "dashboard") refreshDashboard();
+    if (viewName === "patients") loadPatients();
+    if (viewName === "analysis") populatePatientSelect();
+    if (viewName === "reports") loadReports();
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+    button.addEventListener("click", () => showView(button.dataset.view));
+});
+
+async function checkBackend() {
+    const status = document.getElementById("connection-status");
+
+    try {
+        await apiRequest("/api/health");
+        status.textContent = "● Backend Connected";
+        status.style.background = "#e1f5eb";
+        status.style.color = "#16633f";
+    } catch (error) {
+        status.textContent = "● Backend Disconnected";
+        status.style.background = "#ffebee";
+        status.style.color = "#b71c1c";
+    }
+}
+
+async function loadPatients() {
+    try {
+        savedPatients = await apiRequest("/api/patients");
+        renderPatients();
+        populatePatientSelect();
+        document.getElementById("patient-count").textContent = savedPatients.length;
+    } catch (error) {
+        document.getElementById("patients-table").innerHTML =
+            '<div class="empty">Unable to load patients. Check that the backend is running.</div>';
+    }
+}
+
+let editingPatientId = null;
+
+function editPatient(id) {
+    const p = savedPatients.find(item => item.id === id);
+    if (!p) return;
+
+    editingPatientId = id;
+    document.getElementById("patient-name").value = p.name;
+    document.getElementById("patient-age").value = p.age;
+    document.getElementById("patient-allergies").value = (p.allergies || []).join(", ");
+    document.getElementById("patient-conditions").value = (p.conditions || []).join(", ");
+    document.getElementById("patient-form-title").textContent = "Edit Patient";
+    document.getElementById("patient-save-btn").textContent = "Update Patient";
+    document.getElementById("patient-cancel-btn").style.display = "inline-block";
+    document.getElementById("patient-form").scrollIntoView({behavior: "smooth", block: "center"});
+}
+
+function cancelPatientEdit() {
+    editingPatientId = null;
+    document.getElementById("patient-form").reset();
+    document.getElementById("patient-form-title").textContent = "Register Patient";
+    document.getElementById("patient-save-btn").textContent = "Save Patient";
+    document.getElementById("patient-cancel-btn").style.display = "none";
+}
+
+async function deletePatient(id) {
+    const p = savedPatients.find(item => item.id === id);
+    if (!p || !confirm("Delete patient '" + p.name + "'? Saved reports are kept.")) return;
+
+    try {
+        await apiRequest("/api/patients/" + id, {method: "DELETE"});
+        if (editingPatientId === id) cancelPatientEdit();
+        toast("Patient deleted.");
+        await loadPatients();
+    } catch (error) {
+        toast("Unable to delete patient. Restart the backend with the updated main.py.");
+    }
+}
+
+async function deleteReport(id) {
+    if (!confirm("Delete report #" + id + "?")) return;
+
+    try {
+        await apiRequest("/api/reports/" + id, {method: "DELETE"});
+        toast("Report deleted.");
+        await loadReports();
+    } catch (error) {
+        toast("Unable to delete report. Restart the backend with the updated main.py.");
+    }
+}
+
+function renderPatients() {
+    const target = document.getElementById("patients-table");
+
+    if (!savedPatients.length) {
+        target.innerHTML = '<div class="empty">No patients registered yet.</div>';
+        return;
+    }
+
+    target.innerHTML = `
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr><th>Name</th><th>Age</th><th>Allergies</th><th>Conditions</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                ${savedPatients.map(patient => `
+                    <tr>
+                        <td>${escapeHtml(patient.name)}</td>
+                        <td>${patient.age}</td>
+                        <td>${escapeHtml(Array.isArray(patient.allergies) ? (patient.allergies.join(", ") || "Not recorded") : "Not recorded")}</td>
+                        <td>${escapeHtml(Array.isArray(patient.conditions) ? (patient.conditions.join(", ") || "Not recorded") : "Not recorded")}</td>
+                        <td style="white-space:nowrap">
+                            <button class="btn secondary" onclick="editPatient(${patient.id})">Edit</button>
+                            <button class="btn danger" onclick="deletePatient(${patient.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+        </div>`;
+}
+
+document.getElementById("patient-form").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const patient = {
+        name: document.getElementById("patient-name").value.trim(),
+        age: Number(document.getElementById("patient-age").value),
+        allergies: splitValues(document.getElementById("patient-allergies").value),
+        conditions: splitValues(document.getElementById("patient-conditions").value)
+    };
+
+    try {
+        if (!patient.name) { toast("Enter the patient's name."); return; }
+        if (!Number.isInteger(patient.age) || patient.age < 0 || patient.age > 120) {
+            toast("Enter a valid age between 0 and 120.");
+            return;
+        }
+
+        if (editingPatientId) {
+            await apiRequest("/api/patients/" + editingPatientId, {
+                method: "PUT",
+                body: JSON.stringify(patient)
+            });
+            toast("Patient updated.");
+        } else {
+            await apiRequest("/api/patients", {
+                method: "POST",
+                body: JSON.stringify(patient)
+            });
+            toast("Patient saved successfully.");
+        }
+
+        cancelPatientEdit();
+        await loadPatients();
+    } catch (error) {
+        toast("Unable to save patient: " + error.message);
+    }
+});
+
+async function populatePatientSelect() {
+    try {
+        savedPatients = await apiRequest("/api/patients");
+    } catch (error) {
+        return;
+    }
+
+    const select = document.getElementById("analysis-patient-select");
+    const currentValue = select.value;
+
+    select.innerHTML =
+        '<option value="">Enter patient details manually</option>' +
+        savedPatients.map(patient => `
+            <option value="${patient.id}">
+                ${escapeHtml(patient.name)} (Age ${patient.age})
+            </option>
+        `).join("");
+
+    if (savedPatients.some(patient => String(patient.id) === currentValue)) {
+        select.value = currentValue;
+    }
+}
+
+document
+    .getElementById("analysis-patient-select")
+    .addEventListener("change", event => {
+
+        const patient = savedPatients.find(
+            item => String(item.id) === event.target.value
+        );
+
+        // Clear the form when manual entry is selected.
+        if (!patient) {
+            document.getElementById("analysis-name").value = "";
+            document.getElementById("analysis-age").value = "";
+            document.getElementById("analysis-allergies").value = "";
+            document.getElementById("analysis-conditions").value = "";
+
+            return;
+        }
+
+        // Load the selected patient's details.
+        document.getElementById("analysis-name").value =
+            patient.name ?? "";
+
+        document.getElementById("analysis-age").value =
+            patient.age ?? "";
+
+        document.getElementById("analysis-allergies").value =
+            Array.isArray(patient.allergies)
+                ? patient.allergies.join(", ")
+                : "";
+
+        document.getElementById("analysis-conditions").value =
+            Array.isArray(patient.conditions)
+                ? patient.conditions.join(", ")
+                : "";
+    });
+
+function addMedication(name = "", dose = "", frequency = "") {
+    const container = document.getElementById("medication-list");
+    const row = document.createElement("div");
+
+    row.className = "medication-row card";
+    row.style.padding = "15px";
+
+    row.innerHTML = `
+        <div class="row">
+            <div>
+                <label>Medicine Name *</label>
+                <input class="med-name" required maxlength="100"
+                       placeholder="e.g. Ibuprofen" value="${escapeHtml(name)}">
+            </div>
+            <div>
+                <label>Dose</label>
+                <input class="med-dose" maxlength="100"
+                       placeholder="e.g. 200 mg" value="${escapeHtml(dose)}">
+            </div>
+            <div>
+                <label>Frequency</label>
+                <input class="med-frequency" maxlength="100"
+                       placeholder="e.g. Once daily" value="${escapeHtml(frequency)}">
+            </div>
+        </div>
+        <button type="button" class="btn danger remove-med">Remove</button>
+    `;
+
+    row.querySelector(".remove-med").addEventListener("click", () => {
+        row.remove();
+
+        if (!container.querySelector(".medication-row")) {
+            addMedication();
+        }
+    });
+
+    container.appendChild(row);
+}
+
+addMedication();
+
+async function analyzeMedications() {
+    const name = document.getElementById("analysis-name").value.trim();
+    const ageValue = document.getElementById("analysis-age").value;
+    const rows = [...document.querySelectorAll(".medication-row")];
+
+    const medications = rows.map(row => ({
+        name: row.querySelector(".med-name").value.trim(),
+        dose: row.querySelector(".med-dose").value.trim(),
+        frequency: row.querySelector(".med-frequency").value.trim()
+    })).filter(medicine => medicine.name);
+
+    if (!name) {
+        toast("Enter the patient's name.");
+        return;
+    }
+
+    if (ageValue === "" || Number(ageValue) < 0 || Number(ageValue) > 120) {
+        toast("Enter a valid patient age.");
+        return;
+    }
+
+    if (!medications.length) {
+        toast("Enter at least one medication.");
+        return;
+    }
+
+    const payload = {
+        patient: {
+            name,
+            age: Number(ageValue),
+            allergies: splitValues(
+                document.getElementById("analysis-allergies").value
+            ),
+            conditions: splitValues(
+                document.getElementById("analysis-conditions").value
+            )
+        },
+        medications
+    };
+
+    const button = document.getElementById("analyze-btn");
+    button.disabled = true;
+    button.textContent = "Analyzing...";
+
+    try {
+        const report = await apiRequest("/api/analyze", {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        displayAnalysis(report);
+        await refreshDashboard();
+        toast("Analysis completed. Review all warnings carefully.");
+    } catch (error) {
+        toast("Analysis failed: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Analyze Medication List";
+    }
+}
+
+function riskCategory(risk) {
+    const t = (risk.title || "").toLowerCase();
+    if (t.includes("allergy")) return {key: "allergy", icon: "🚫", label: "Allergy"};
+    if (t.includes("duplicate")) return {key: "duplicate", icon: "⧉", label: "Duplicate"};
+    if (t.includes("interaction")) return {key: "interaction", icon: "⚡", label: "Interaction"};
+    if (t.includes("kidney")) return {key: "condition", icon: "🩺", label: "Condition"};
+    return {key: "review", icon: "📋", label: "Review"};
+}
+
+function displayAnalysis(report) {
+    document.getElementById("analysis-results").style.display = "block";
+
+    const order = {HIGH: 0, MEDIUM: 1, LOW: 2};
+    const risks = [...report.risks].sort(
+        (a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3)
+    );
+    const count = level => risks.filter(r => r.severity === level).length;
+
+    const allergyRisks = risks.filter(r => riskCategory(r).key === "allergy");
+    const duplicateRisks = risks.filter(r => riskCategory(r).key === "duplicate");
+
+    let banners = "";
+    if (allergyRisks.length) {
+        banners += `
+            <div class="banner allergy"><span class="ico">🚫</span><div>
+                <strong>Allergy alert:</strong> a recorded allergy may relate to
+                ${escapeHtml([...new Set(allergyRisks.flatMap(r => r.medications))].join(", "))}.
+                Obtain professional review.
+            </div></div>`;
+    }
+    if (duplicateRisks.length) {
+        banners += `
+            <div class="banner duplicate"><span class="ico">⧉</span><div>
+                <strong>Duplicate medicine alert:</strong>
+                ${escapeHtml([...new Set(duplicateRisks.flatMap(r => r.medications))].join(", "))}
+                may refer to the same medicine. Verify before use.
+            </div></div>`;
+    }
+
+    document.getElementById("analysis-summary").innerHTML = `
+        <p><strong>Patient:</strong> ${escapeHtml(report.patient_name)}
+           &nbsp;|&nbsp; <strong>Age:</strong> ${escapeHtml(report.patient_age ?? "-")}
+           &nbsp;|&nbsp; <strong>Medication entries:</strong> ${report.medication_count}</p>
+        <div class="med-tags">${(report.medications || []).map(m =>
+            `<span class="pill">${escapeHtml(m.name)}${m.dose ? " " + escapeHtml(m.dose) : ""}</span>`
+        ).join("")}</div>
+        <div class="sev-grid">
+            <div class="sev-box HIGH"><b>${count("HIGH")}</b><span>High severity</span></div>
+            <div class="sev-box MEDIUM"><b>${count("MEDIUM")}</b><span>Medium severity</span></div>
+            <div class="sev-box LOW"><b>${count("LOW")}</b><span>Low severity</span></div>
+        </div>
+        ${banners}
+        <p class="muted">Analysis time: ${escapeHtml(report.analyzed_at)}</p>
+    `;
+
+    const results = document.getElementById("risk-results");
+
+    if (!risks.length) {
+        results.innerHTML = `
+            <div class="alert info">
+                No warnings were generated by the limited demo rules for this
+                input. This does not establish that the medications are safe.
+                The rule set does not cover all medicines, doses, or conditions.
+            </div>`;
+    } else {
+        results.innerHTML = risks.map(risk => {
+            const cat = riskCategory(risk);
+            return `
+            <div class="risk-item ${escapeHtml(risk.severity)}">
+                <span class="badge ${escapeHtml(risk.severity)}">${escapeHtml(risk.severity)}</span>
+                <span class="cat">${cat.icon} ${cat.label}</span>
+                <h3>${escapeHtml(risk.title)}</h3>
+                <p>${escapeHtml(risk.reason)}</p>
+                <p><strong>Related medicines:</strong>
+                    ${(risk.medications || []).map(m =>
+                        `<span class="pill">${escapeHtml(m)}</span>`).join("")}
+                </p>
+            </div>`;
+        }).join("");
+    }
+
+    document.getElementById("analysis-notice").textContent = report.notice;
+    document.getElementById("analysis-results").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+function loadDemo(kind) {
+    const demos = {
+        complex: {
+            name: "Demo Patient A", age: 72,
+            allergies: "Penicillin", conditions: "Kidney Disease",
+            meds: [
+                ["Warfarin", "5 mg", "Once daily"],
+                ["Ibuprofen", "200 mg", "As needed"],
+                ["Amoxicillin", "500 mg", "Three times daily"],
+                ["Paracetamol", "500 mg", "As needed"],
+                ["Acetaminophen", "500 mg", "As needed"]
+            ]
+        },
+        clear: {
+            name: "Demo Patient B", age: 35,
+            allergies: "", conditions: "",
+            meds: [
+                ["Metformin", "500 mg", "Twice daily"],
+                ["Amlodipine", "5 mg", "Once daily"]
+            ]
+        }
+    };
+    const d = demos[kind];
+    if (!d) return;
+
+    document.getElementById("analysis-patient-select").value = "";
+    document.getElementById("analysis-name").value = d.name;
+    document.getElementById("analysis-age").value = d.age;
+    document.getElementById("analysis-allergies").value = d.allergies;
+    document.getElementById("analysis-conditions").value = d.conditions;
+    document.getElementById("medication-list").innerHTML = "";
+    d.meds.forEach(m => addMedication(...m));
+    toast("Demo data loaded. Click Analyze Medication List.");
+}
+
+async function extractPrescription() {
+    const text = document.getElementById("prescription-text").value.trim();
+
+    if (!text) {
+        toast("Paste some prescription text first.");
+        return;
+    }
+
+    const button = document.getElementById("extract-btn");
+    button.disabled = true;
+    button.textContent = "Checking...";
+
+    try {
+        const result = await apiRequest("/api/prescription/extract", {
+            method: "POST",
+            body: JSON.stringify({text})
+        });
+
+        const target = document.getElementById("extract-results");
+
+        if (!result.medications.length) {
+            target.innerHTML = `
+                <div class="alert info">
+                    No names from the limited demo medicine list were detected.
+                    This does not mean the prescription contains no medicines.
+                </div>`;
+            return;
+        }
+
+        target.innerHTML = `
+            <div class="card">
+                <h3>Detected Medicine Names</h3>
+                <p>${result.medications.map(item =>
+                    `<span class="pill">${escapeHtml(item.name)}</span>`
+                ).join("")}</p>
+                <p class="muted">${escapeHtml(result.notice)}</p>
+                <button class="btn" onclick="useExtractedMedicines()">
+                    Send Names to Medication Analysis
+                </button>
+            </div>`;
+
+        window.extractedMedicines = result.medications;
+    } catch (error) {
+        toast("Extraction failed: " + error.message);
+    } finally {
+        button.disabled = false;
+        button.textContent = "Identify Medicine Names";
+    }
+}
+
+function useExtractedMedicines() {
+    showView("analysis");
+
+    document.getElementById("medication-list").innerHTML = "";
+
+    const medicines = window.extractedMedicines || [];
+
+    if (!medicines.length) {
+        addMedication();
+    } else {
+        medicines.forEach(medicine => addMedication(medicine.name));
+    }
+
+    toast("Review the detected names and enter missing patient information.");
+}
+
+async function loadReports() {
+    try {
+        savedReports = await apiRequest("/api/reports");
+        renderReports();
+    } catch (error) {
+        document.getElementById("reports-table").innerHTML =
+            '<div class="empty">Unable to load reports. Check the backend.</div>';
+    }
+}
+
+function renderReports() {
+    const target = document.getElementById("reports-table");
+
+    if (!savedReports.length) {
+        target.innerHTML = '<div class="empty">No reports generated yet.</div>';
+        return;
+    }
+
+    target.innerHTML = `
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th><th>Patient</th><th>Medicines</th>
+                    <th>Warnings</th><th>Date</th><th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${savedReports.map(report => `
+                    <tr>
+                        <td>${report.id}</td>
+                        <td>${escapeHtml(report.patient_name)}</td>
+                        <td>${report.medication_count}</td>
+                        <td>${report.risk_count}</td>
+                        <td>${escapeHtml(report.created_at)}</td>
+                        <td>
+                            <button class="btn secondary"
+                                onclick="openSavedReport(${report.id})">
+                                View
+                            </button>
+                            <button class="btn danger" onclick="deleteReport(${report.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+        </div>`;
+}
+
+function openSavedReport(id) {
+    const saved = savedReports.find(report => report.id === id);
+
+    if (!saved) return;
+
+    showView("analysis");
+    displayAnalysis(saved.report);
+}
+
+async function refreshDashboard() {
+    try {
+        const [patients, reports] = await Promise.all([
+            apiRequest("/api/patients"),
+            apiRequest("/api/reports")
+        ]);
+
+        savedPatients = patients;
+        savedReports = reports;
+
+        document.getElementById("patient-count").textContent = patients.length;
+        document.getElementById("report-count").textContent = reports.length;
+        document.getElementById("flagged-count").textContent =
+            reports.filter(report => report.risk_count > 0).length;
+
+        const target = document.getElementById("recent-reports");
+
+        if (!reports.length) {
+            target.innerHTML = '<div class="empty">No reports yet. Start a medication analysis to create one.</div>';
+        } else {
+            target.innerHTML = `
+                <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Patient</th><th>Medicines</th><th>Warnings</th><th>Date</th></tr></thead>
+                    <tbody>
+                        ${reports.slice(0, 5).map(report => `
+                            <tr>
+                                <td>${escapeHtml(report.patient_name)}</td>
+                                <td>${report.medication_count}</td>
+                                <td>${report.risk_count}</td>
+                                <td>${escapeHtml(report.created_at)}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+                </div>`;
+        }
+    } catch (error) {
+        document.getElementById("recent-reports").innerHTML =
+            '<div class="empty">Unable to connect to the backend.</div>';
+    }
+}
+
+async function initialize() {
+    await checkBackend();
+    await loadPatients();
+    await refreshDashboard();
+}
+
+initialize();
+</script>
+</body>
+</html>
